@@ -14,15 +14,29 @@ VARIANTS = {
         "background": "#040404",
         "foreground": "#feffff",
         "accent": "#5da602",
+        "border": "#355f01",
+        "bar": "#000000",
         "muted": "#777b80",
         "chromium": "4,4,4",
+        "ghostty_palette": (
+            "0=#040404", "1=#d84a33", "2=#5da602", "3=#eebb6e",
+            "4=#417ab3", "5=#e5c499", "6=#bdcfe5", "7=#dbded8",
+            "8=#685656", "9=#d76b42", "10=#99b52c", "11=#ffb670",
+            "12=#97d7ef", "13=#aa7900", "14=#bdcfe5", "15=#e4d5c7",
+        ),
+        "ghostty_selection": "#606060",
+        "ghostty_cursor_text": "#000000",
     },
     "adventure-time": {
         "background": "#1f1d45",
         "foreground": "#f8dcc0",
         "accent": "#549235",
+        "border": "#365f22",
+        "bar": "#1c1a3e",
         "muted": "#9E9E9E",
         "chromium": "31,29,69",
+        "ghostty_palette": ("1=#a02733", "2=#549235", "4=#2b53ab", "11=#efc11a"),
+        "ghostty_selection": "#315520",
     },
 }
 
@@ -73,8 +87,8 @@ class ThemeTests(unittest.TestCase):
                 self.assertTrue(required <= {path.name for path in (ROOT / name).iterdir()})
                 self.assertEqual(expected["chromium"], (ROOT / name / "chromium.theme").read_text().strip())
                 shell = tomllib.loads((ROOT / name / "shell.hyprland.toml").read_text())
-                self.assertEqual(expected["accent"].lower(), shell["active-border"].lower())
-                self.assertIn(expected["accent"].removeprefix("#").lower(), (ROOT / name / "hyprland.lua").read_text().lower())
+                self.assertEqual(expected["border"].lower(), shell["active-border"].lower())
+                self.assertIn(expected["border"].removeprefix("#").lower(), (ROOT / name / "hyprland.lua").read_text().lower())
 
     def test_assets_have_expected_dimensions(self):
         for name in VARIANTS:
@@ -126,8 +140,22 @@ class ThemeTests(unittest.TestCase):
                 self.assertEqual(0, result.returncode, result.stderr)
                 generated = home / ".local/state/omarchy/current/theme"
                 self.assertIn(expected["background"], (generated / "colors.toml").read_text())
+                ghostty = (generated / "ghostty.conf").read_text()
+                self.assertIn(f'background = {expected["background"]}', ghostty)
+                self.assertIn(f'foreground = {expected["foreground"]}', ghostty)
+                for entry in expected["ghostty_palette"]:
+                    self.assertIn(f"palette = {entry}", ghostty)
+                self.assertIn(
+                    f'selection-background = {expected["ghostty_selection"]}', ghostty
+                )
+                if "ghostty_cursor_text" in expected:
+                    self.assertIn(
+                        f'cursor-text = {expected["ghostty_cursor_text"]}', ghostty
+                    )
+
                 shell = tomllib.loads((generated / "shell.toml").read_text())
-                self.assertEqual(expected["accent"].lower(), shell["hyprland"]["active-border"].lower())
+                self.assertEqual(expected["border"].lower(), shell["hyprland"]["active-border"].lower())
+                self.assertEqual(expected["bar"].lower(), shell["bar"]["background"].lower())
 
 
 if __name__ == "__main__":
