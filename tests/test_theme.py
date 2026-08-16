@@ -15,16 +15,18 @@ VARIANTS = {
         "foreground": "#feffff",
         "accent": "#5da602",
         "border": "#355f01",
+        "regular_border": "#141414",
         "bar": "#000000",
         "muted": "#777b80",
-        "chromium": "4,4,4",
+        "chromium": "21,21,21",
+        "ghostty_background": "#151515",
         "ghostty_palette": (
             "0=#040404", "1=#d84a33", "2=#5da602", "3=#eebb6e",
             "4=#417ab3", "5=#e5c499", "6=#bdcfe5", "7=#dbded8",
             "8=#685656", "9=#d76b42", "10=#99b52c", "11=#ffb670",
             "12=#97d7ef", "13=#aa7900", "14=#bdcfe5", "15=#e4d5c7",
         ),
-        "ghostty_selection": "#606060",
+        "ghostty_selection": "#303030",
         "ghostty_cursor_text": "#000000",
     },
     "adventure-time": {
@@ -32,6 +34,7 @@ VARIANTS = {
         "foreground": "#f8dcc0",
         "accent": "#549235",
         "border": "#365f22",
+        "regular_border": "#333150",
         "bar": "#1c1a3e",
         "muted": "#9E9E9E",
         "chromium": "31,29,69",
@@ -88,6 +91,10 @@ class ThemeTests(unittest.TestCase):
                 self.assertEqual(expected["chromium"], (ROOT / name / "chromium.theme").read_text().strip())
                 shell = tomllib.loads((ROOT / name / "shell.hyprland.toml").read_text())
                 self.assertEqual(expected["border"].lower(), shell["active-border"].lower())
+                self.assertEqual(
+                    expected["regular_border"].lower(),
+                    shell["active-border-foreground"].lower(),
+                )
                 self.assertIn(expected["border"].removeprefix("#").lower(), (ROOT / name / "hyprland.lua").read_text().lower())
 
     def test_assets_have_expected_dimensions(self):
@@ -141,7 +148,10 @@ class ThemeTests(unittest.TestCase):
                 generated = home / ".local/state/omarchy/current/theme"
                 self.assertIn(expected["background"], (generated / "colors.toml").read_text())
                 ghostty = (generated / "ghostty.conf").read_text()
-                self.assertIn(f'background = {expected["background"]}', ghostty)
+                self.assertIn(
+                    f'background = {expected.get("ghostty_background", expected["background"])}',
+                    ghostty,
+                )
                 self.assertIn(f'foreground = {expected["foreground"]}', ghostty)
                 for entry in expected["ghostty_palette"]:
                     self.assertIn(f"palette = {entry}", ghostty)
@@ -155,6 +165,10 @@ class ThemeTests(unittest.TestCase):
 
                 shell = tomllib.loads((generated / "shell.toml").read_text())
                 self.assertEqual(expected["border"].lower(), shell["hyprland"]["active-border"].lower())
+                self.assertEqual(
+                    expected["regular_border"].lower(),
+                    shell["hyprland"]["active-border-foreground"].lower(),
+                )
                 self.assertEqual(expected["bar"].lower(), shell["bar"]["background"].lower())
 
 
