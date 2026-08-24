@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate deterministic, dependency-free PNG assets for both variants."""
+"""Generate deterministic, dependency-free PNG assets for the theme."""
 
 import binascii
 import struct
@@ -9,8 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 THEMES = {
-    "adventure": {"top": "#171717", "bottom": "#040404"},
-    "adventure-time": {"top": "#29274a", "bottom": "#1f1d45"},
+    "adventure": {"top": "#040404", "bottom": "#040404"},
 }
 
 
@@ -42,7 +41,7 @@ def render_png(path, width, height, colors):
 
 def main():
     for name, colors in THEMES.items():
-        theme = ROOT / name
+        theme = ROOT
         render_png(theme / "backgrounds" / f"{name}.png", 1920, 1080, colors)
         render_png(theme / "unlock.png", 1920, 1080, colors)
         render_png(theme / "preview.png", 640, 360, colors)

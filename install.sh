@@ -3,7 +3,21 @@ set -euo pipefail
 
 repo_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 destination=${XDG_CONFIG_HOME:-${HOME}/.config}/omarchy/themes
-themes=(adventure adventure-time)
+theme_files=(
+  backgrounds
+  btop.theme
+  chromium.theme
+  colors.toml
+  ghostty.conf
+  hyprland.lua
+  icons.theme
+  preview.png
+  preview-unlock.png
+  shell.bar.toml
+  shell.hyprland.toml
+  unlock.png
+  zed.json
+)
 
 usage() {
   echo "Usage: ./install.sh [--destination DIR]"
@@ -32,11 +46,16 @@ while (($#)); do
 done
 
 mkdir -p -- "$destination"
-for theme in "${themes[@]}"; do
-  rm -rf -- "$destination/$theme"
-  cp -R -- "$repo_dir/$theme" "$destination/$theme"
-  echo "Installed $theme"
+rm -rf -- "$destination/adventure"
+mkdir -p -- "$destination/adventure"
+for file in "${theme_files[@]}"; do
+  cp -R -- "$repo_dir/$file" "$destination/adventure/$file"
 done
+echo "Installed adventure"
 
-echo "Choose a variant with: omarchy theme set adventure"
-echo "Or:                    omarchy theme set adventure-time"
+if command -v omarchy >/dev/null 2>&1; then
+  omarchy theme set adventure
+  echo "Applied adventure"
+else
+  echo "Omarchy is not installed. Activate later with: omarchy theme set adventure"
+fi
