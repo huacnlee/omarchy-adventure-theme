@@ -145,7 +145,7 @@ class ThemeTests(unittest.TestCase):
 
     def test_assets_have_expected_dimensions(self):
         for relative, expected in {
-            "backgrounds/adventure.png": (1920, 1080),
+            "backgrounds/adventure.png": (3840, 2160),
             "unlock.png": (1920, 1080),
             "preview.png": (640, 360),
             "preview-unlock.png": (640, 360),
@@ -155,10 +155,9 @@ class ThemeTests(unittest.TestCase):
                 self.assertEqual(b"\x89PNG\r\n\x1a\n", data[:8])
                 self.assertEqual(expected, struct.unpack(">II", data[16:24]))
 
-    def test_desktop_login_and_lock_assets_use_theme_background(self):
+    def test_login_and_lock_assets_use_theme_background(self):
         expected_pixel = bytes.fromhex("040404")
         for relative in (
-            "backgrounds/adventure.png",
             "unlock.png",
             "preview.png",
             "preview-unlock.png",
@@ -170,6 +169,24 @@ class ThemeTests(unittest.TestCase):
                     for row in rows
                     for offset in range(0, len(row), 3)
                 ))
+
+    def test_asset_generator_preserves_custom_wallpaper(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            scripts = root / "scripts"
+            scripts.mkdir()
+            shutil.copy(ROOT / "scripts/generate_assets.py", scripts)
+            wallpaper = root / "backgrounds/adventure.png"
+            wallpaper.parent.mkdir()
+            wallpaper.write_bytes(b"custom wallpaper")
+
+            result = subprocess.run(
+                ["python", scripts / "generate_assets.py"],
+                capture_output=True, text=True,
+            )
+
+            self.assertEqual(0, result.returncode, result.stderr)
+            self.assertEqual(b"custom wallpaper", wallpaper.read_bytes())
 
     def test_installer_overwrites_only_adventure(self):
         with tempfile.TemporaryDirectory() as temporary:

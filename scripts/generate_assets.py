@@ -42,7 +42,6 @@ def render_png(path, width, height, colors):
 def main():
     for name, colors in THEMES.items():
         theme = ROOT
-        render_png(theme / "backgrounds" / f"{name}.png", 1920, 1080, colors)
         render_png(theme / "unlock.png", 1920, 1080, colors)
         render_png(theme / "preview.png", 640, 360, colors)
         render_png(theme / "preview-unlock.png", 640, 360, colors)
